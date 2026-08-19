@@ -2,75 +2,292 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Quiz Calculator</title>
+  <title>Enhanced Quiz Calculator</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; text-align: center; }
-    .card { border: 1px solid #ccc; padding: 20px; max-width: 400px; margin: 0 auto; border-radius: 8px; }
-    input { padding: 8px; margin: 5px; }
-    button { padding: 8px 12px; cursor: pointer; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f2f5;
+      padding: 40px 20px;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    .stats-container {
+      display: flex;
+      justify-content: space-around;
+      background-color: #f8f9fa;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    .question-box {
+      font-size: 1.4rem;
+      margin: 20px 0;
+      color: #2c3e50;
+      font-weight: bold;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    input[type="number"] {
+      padding: 10px;
+      font-size: 1rem;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      width: 120px;
+      outline: none;
+      text-align: center;
+    }
+
+    input[type="number"]:focus {
+      border-color: #007bff;
+    }
+
+    button {
+      padding: 10px 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #ffffff;
+      background-color: #007bff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-secondary {
+      background-color: #6c757d;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    .btn-secondary:hover {
+      background-color: #5a6268;
+    }
+
+    .toggle-container {
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    #feedback {
+      height: 20px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .correct { color: #28a745; }
+    .wrong { color: #dc3545; }
+    
+    hr {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 20px 0;
+    }
+
+    #shareStatus {
+      font-size: 0.85rem;
+      color: #28a745;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
 
 <div class="card">
   <h2>AI Quiz Calculator</h2>
-  <p>Streak: <strong id="streakDisplay">0</strong></p>
+
+  <div class="stats-container">
+    <div>Time: <span id="timerDisplay">10</span>s</div>
+    <div>Streak: <span id="streakDisplay">0</span></div>
+    <div>High Score: <span id="highScoreDisplay">0</span></div>
+  </div>
+
+  <div class="toggle-container">
+    <input type="checkbox" id="streakToggle" checked onchange="toggleStreakMode()">
+    <label for="streakToggle">Enable Streak Mode</label>
+  </div>
 
   <div id="quizArea">
-    <p id="questionText">Loading question...</p>
-    <input type="number" id="answerInput" placeholder="Your answer">
-    <button onclick="checkAnswer()">Submit</button>
+    <div id="feedback"></div>
+    <div class="question-box" id="questionText">Loading question...</div>
+    <div class="input-group">
+      <input type="number" id="answerInput" placeholder="Your answer" autofocus>
+      <button onclick="checkAnswer()">Submit</button>
+    </div>
   </div>
 
   <hr>
-  <button onclick="generateShareLink()">Copy Shareable Link</button>
+  <button class="btn-secondary" onclick="generateShareLink()">Copy Shareable Link</button>
   <p id="shareStatus"></p>
 </div>
 
 <script>
   let currentStreak = 0;
+  let highScore = 0;
   let currentNum1 = 0;
   let currentNum2 = 0;
+  let isStreakMode = true;
+  
+  // Timer variables
+  let timeLeft = 10;
+  let timerInterval = null;
+  const TIME_LIMIT = 10; // Seconds per question
 
-  // Check if a friend opened a link with a shared streak
+  // Check URL parameters for shared streak
   const urlParams = new URLSearchParams(window.location.search);
   const sharedStreak = urlParams.get('streak');
   if (sharedStreak) {
-    alert(`Your friend challenged you! Their streak was: ${sharedStreak}`);
+    alert(`Your friend challenged you! Their high score/streak was: ${sharedStreak}`);
+  }
+
+  // Allow pressing Enter to submit
+  document.getElementById('answerInput').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+      checkAnswer();
+    }
+  });
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timeLeft = TIME_LIMIT;
+    document.getElementById('timerDisplay').innerText = timeLeft;
+
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      document.getElementById('timerDisplay').innerText = timeLeft;
+
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        handleTimeout();
+      }
+    }, 1000);
+  }
+
+  function handleTimeout() {
+    showFeedback('Time out!', false);
+    resetStreakOnFailure();
+    generateQuestion();
   }
 
   function generateQuestion() {
     currentNum1 = Math.floor(Math.random() * 12) + 1;
     currentNum2 = Math.floor(Math.random() * 12) + 1;
-    document.getElementById('questionText').innerText = `What is ${currentNum1} × ${currentNum2}?`;
-    document.getElementById('answerInput').value = '';
+    document.getElementById('questionText').innerText = `${currentNum1} × ${currentNum2} = ?`;
+    
+    const input = document.getElementById('answerInput');
+    input.value = '';
+    input.focus();
+    
+    startTimer();
   }
 
   function checkAnswer() {
-    const userAnswer = parseInt(document.getElementById('answerInput').value, 10);
+    const inputElement = document.getElementById('answerInput');
+    const inputVal = inputElement.value.trim();
+
+    if (inputVal === '') {
+      return;
+    }
+
+    clearInterval(timerInterval);
+
+    const userAnswer = parseInt(inputVal, 10);
     const correctAnswer = currentNum1 * currentNum2;
 
     if (userAnswer === correctAnswer) {
       currentStreak++;
-      alert('Correct!');
+      
+      if (currentStreak > highScore) {
+        highScore = currentStreak;
+        document.getElementById('highScoreDisplay').innerText = highScore;
+      }
+      
+      showFeedback('Correct!', true);
     } else {
-      alert(`Wrong! The answer was ${correctAnswer}. Streak reset.`);
-      currentStreak = 0;
+      showFeedback(`Wrong! Answer was ${correctAnswer}.`, false);
+      resetStreakOnFailure();
     }
 
-    document.getElementById('streakDisplay').innerText = currentStreak;
+    document.getElementById('streakDisplay').innerText = isStreakMode ? currentStreak : 'OFF';
     generateQuestion();
   }
 
-  function generateShareLink() {
-    const shareUrl = `${window.location.origin}${window.location.pathname}?streak=${currentStreak}`;
-    navigator.clipboard.writeText(shareUrl);
-    document.getElementById('shareStatus').innerText = 'Link copied to clipboard!';
+  function resetStreakOnFailure() {
+    if (isStreakMode) {
+      currentStreak = 0;
+      document.getElementById('streakDisplay').innerText = currentStreak;
+    }
   }
 
-  // Start first question
+  function toggleStreakMode() {
+    isStreakMode = document.getElementById('streakToggle').checked;
+    const streakDisplay = document.getElementById('streakDisplay');
+    
+    if (!isStreakMode) {
+      currentStreak = 0;
+      streakDisplay.innerText = 'OFF';
+    } else {
+      streakDisplay.innerText = currentStreak;
+    }
+  }
+
+  function showFeedback(message, isSuccess) {
+    const feedback = document.getElementById('feedback');
+    feedback.innerText = message;
+    feedback.className = isSuccess ? 'correct' : 'wrong';
+  }
+
+  function generateShareLink() {
+    const scoreToShare = isStreakMode ? currentStreak : highScore;
+    const shareUrl = `${window.location.origin}${window.location.pathname}?streak=${scoreToShare}`;
+    
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      document.getElementById('shareStatus').innerText = 'Link copied to clipboard!';
+      setTimeout(() => {
+        document.getElementById('shareStatus').innerText = '';
+      }, 3000);
+    });
+  }
+
+  // Start the first question
   generateQuestion();
 </script>
 
 </body>
 </html>
+    
+
