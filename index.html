@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Calculator</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; text-align: center; }
+    .card { border: 1px solid #ccc; padding: 20px; max-width: 400px; margin: 0 auto; border-radius: 8px; }
+    input { padding: 8px; margin: 5px; }
+    button { padding: 8px 12px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>AI Quiz Calculator</h2>
+  <p>Streak: <strong id="streakDisplay">0</strong></p>
+
+  <div id="quizArea">
+    <p id="questionText">Loading question...</p>
+    <input type="number" id="answerInput" placeholder="Your answer">
+    <button onclick="checkAnswer()">Submit</button>
+  </div>
+
+  <hr>
+  <button onclick="generateShareLink()">Copy Shareable Link</button>
+  <p id="shareStatus"></p>
+</div>
+
+<script>
+  let currentStreak = 0;
+  let currentNum1 = 0;
+  let currentNum2 = 0;
+
+  // Check if a friend opened a link with a shared streak
+  const urlParams = new URLSearchParams(window.location.search);
+  const sharedStreak = urlParams.get('streak');
+  if (sharedStreak) {
+    alert(`Your friend challenged you! Their streak was: ${sharedStreak}`);
+  }
+
+  function generateQuestion() {
+    currentNum1 = Math.floor(Math.random() * 12) + 1;
+    currentNum2 = Math.floor(Math.random() * 12) + 1;
+    document.getElementById('questionText').innerText = `What is ${currentNum1} × ${currentNum2}?`;
+    document.getElementById('answerInput').value = '';
+  }
+
+  function checkAnswer() {
+    const userAnswer = parseInt(document.getElementById('answerInput').value, 10);
+    const correctAnswer = currentNum1 * currentNum2;
+
+    if (userAnswer === correctAnswer) {
+      currentStreak++;
+      alert('Correct!');
+    } else {
+      alert(`Wrong! The answer was ${correctAnswer}. Streak reset.`);
+      currentStreak = 0;
+    }
+
+    document.getElementById('streakDisplay').innerText = currentStreak;
+    generateQuestion();
+  }
+
+  function generateShareLink() {
+    const shareUrl = `${window.location.origin}${window.location.pathname}?streak=${currentStreak}`;
+    navigator.clipboard.writeText(shareUrl);
+    document.getElementById('shareStatus').innerText = 'Link copied to clipboard!';
+  }
+
+  // Start first question
+  generateQuestion();
+</script>
+
+</body>
+</html>
