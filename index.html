@@ -2,186 +2,328 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Enhanced Quiz Calculator</title>
+  <title>Gen Z Quiz & Normal Calculator with Animated Background</title>
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f0f2f5;
-      padding: 40px 20px;
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Space+Grotesk:wght@600;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
       margin: 0;
-      display: flex;
-      justify-content: center;
+      padding: 0;
     }
 
-    .card {
-      background: #ffffff;
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #a1c4fd 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden; /* Important for background animations */
+      padding: 20px;
+      position: relative;
+    }
+
+    /* Floating Background Emojis Animation */
+    .bg-animation {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: -1; /* Place behind calculator */
+      pointer-events: none; /* Make unclickable */
+    }
+
+    .bg-emoji {
+      position: absolute;
+      display: block;
+      list-style: none;
+      opacity: 0.15; /* Subdued background effect */
+      animation: float 25s linear infinite;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0) rotate(0deg) scale(0.5);
+      }
+      100% {
+        transform: translateY(-100vh) rotate(360deg) scale(1.5);
+      }
+    }
+
+    /* Calculator Chassis */
+    .calculator {
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 3px solid rgba(255, 255, 255, 0.8);
+      border-radius: 32px;
+      padding: 24px;
+      width: 360px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+      z-index: 10; /* Bring calculator to front */
+    }
+
+    /* Screen Display */
+    .screen {
+      background: #18181b;
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      margin-bottom: 16px;
+      color: #fff;
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #a1a1aa;
+      border-bottom: 1px solid #27272a;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+
+    .streak-badge {
+      color: #ff5e36;
+      background: rgba(255, 94, 54, 0.15);
+      padding: 2px 8px;
       border-radius: 12px;
-      padding: 30px;
-      max-width: 420px;
-      width: 100%;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-      text-align: center;
     }
 
-    h2 {
-      margin-top: 0;
-      color: #333;
+    .question-line {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem;
+      color: #a78bfa;
+      min-height: 1.8rem;
+      overflow-x: auto;
     }
 
-    .stats-container {
+    .input-line {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.2rem;
+      color: #4ade80;
+      text-align: right;
+      min-height: 2.6rem;
+      letter-spacing: 1px;
+      word-break: break-all;
+    }
+
+    .feedback-line {
+      font-size: 0.85rem;
+      font-weight: 800;
+      min-height: 1.2rem;
+      text-align: right;
+      margin-top: 4px;
+      color: #f43f5e;
+    }
+
+    /* Mode Toggle */
+    .toggle-row {
       display: flex;
-      justify-content: space-around;
-      background-color: #f8f9fa;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      font-weight: 600;
-      color: #555;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      color: #27272a;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 0 4px;
     }
 
-    .question-box {
-      font-size: 1.4rem;
-      margin: 20px 0;
-      color: #2c3e50;
-      font-weight: bold;
-    }
-
-    .input-group {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-
-    input[type="number"] {
-      padding: 10px;
-      font-size: 1rem;
-      border: 2px solid #ddd;
-      border-radius: 6px;
-      width: 120px;
-      outline: none;
-      text-align: center;
-    }
-
-    input[type="number"]:focus {
-      border-color: #007bff;
-    }
-
-    button {
-      padding: 10px 16px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: #ffffff;
-      background-color: #007bff;
-      border: none;
-      border-radius: 6px;
+    .toggle-row label {
       cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    .btn-secondary {
-      background-color: #6c757d;
-      margin-top: 10px;
-      width: 100%;
-    }
-
-    .btn-secondary:hover {
-      background-color: #5a6268;
-    }
-
-    .toggle-container {
-      margin: 15px 0;
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 8px;
-      font-size: 0.9rem;
-      color: #666;
     }
 
-    #feedback {
-      height: 20px;
-      font-weight: bold;
-      margin-bottom: 15px;
+    .toggle-row input[type="checkbox"] {
+      accent-color: #8b5cf6;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
     }
 
-    .correct { color: #28a745; }
-    .wrong { color: #dc3545; }
-    
-    hr {
+    /* Keypad Grid */
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .btn {
+      background: #ffffff;
+      color: #18181b;
+      border: 2px solid #f4f4f5;
+      border-radius: 16px;
+      padding: 14px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #e4e4e7;
+      transition: all 0.1s ease;
+    }
+
+    .btn:active {
+      box-shadow: 0 0 0 #e4e4e7;
+      transform: translateY(4px);
+    }
+
+    .btn-action {
+      background: #ffe4e6;
+      color: #f43f5e;
+      border-color: #fecdd3;
+      box-shadow: 0 4px 0 #fda4af;
+    }
+
+    .btn-op {
+      background: #f3e8ff;
+      color: #9333ea;
+      border-color: #e9d5ff;
+      box-shadow: 0 4px 0 #d8b4fe;
+    }
+
+    .btn-submit {
+      background: #c084fc;
+      color: #ffffff;
+      border-color: #a855f7;
+      box-shadow: 0 4px 0 #7e22ce;
+    }
+
+    .btn-share {
+      background: #18181b;
+      color: #f43f5e;
       border: none;
-      border-top: 1px solid #eee;
-      margin: 20px 0;
-    }
-
-    #shareStatus {
-      font-size: 0.85rem;
-      color: #28a745;
-      margin-top: 8px;
+      border-radius: 16px;
+      grid-column: span 4;
+      font-size: 0.9rem;
+      font-weight: 800;
+      box-shadow: 0 4px 0 #000000;
+      margin-top: 4px;
+      padding: 12px;
     }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <h2>AI Quiz Calculator</h2>
+  <!-- Animated Background Layer -->
+  <ul class="bg-animation" id="bgAnimation">
+    <!-- Emojis will be injected here by JavaScript -->
+  </ul>
 
-  <div class="stats-container">
-    <div>Time: <span id="timerDisplay">10</span>s</div>
-    <div>Streak: <span id="streakDisplay">0</span></div>
-    <div>High Score: <span id="highScoreDisplay">0</span></div>
-  </div>
-
-  <div class="toggle-container">
-    <input type="checkbox" id="streakToggle" checked onchange="toggleStreakMode()">
-    <label for="streakToggle">Enable Streak Mode</label>
-  </div>
-
-  <div id="quizArea">
-    <div id="feedback"></div>
-    <div class="question-box" id="questionText">Loading question...</div>
-    <div class="input-group">
-      <input type="number" id="answerInput" placeholder="Your answer" autofocus>
-      <button onclick="checkAnswer()">Submit</button>
+<div class="calculator">
+  <!-- Screen Display -->
+  <div class="screen">
+    <div class="status-bar" id="statusBar">
+      <span>⏱️ <span id="timerDisplay">10</span>s</span>
+      <span class="streak-badge">🔥 <span id="streakDisplay">0</span></span>
+      <span>👑 <span id="highScoreDisplay">0</span></span>
     </div>
+    <div class="question-line" id="questionDisplay">Loading...</div>
+    <div class="input-line" id="inputDisplay">_</div>
+    <div class="feedback-line" id="feedbackDisplay"></div>
   </div>
 
-  <hr>
-  <button class="btn-secondary" onclick="generateShareLink()">Copy Shareable Link</button>
-  <p id="shareStatus"></p>
+  <!-- Mode Toggle -->
+  <div class="toggle-row">
+    <label>
+      <input type="checkbox" id="streakToggle" checked onchange="toggleMode()">
+      Quiz Mode (Streak)
+    </label>
+    <span id="modeTag" style="color: #6b21a8; font-size: 0.75rem;">QUIZ MODE</span>
+  </div>
+
+  <!-- Keypad -->
+  <div class="keypad">
+    <button class="btn btn-action" onclick="clearInput()">C</button>
+    <button class="btn btn-action" onclick="backspace()">⌫</button>
+    <button class="btn btn-op" onclick="pressOp('/')">÷</button>
+    <button class="btn btn-op" onclick="pressOp('*')">×</button>
+
+    <button class="btn" onclick="pressKey('7')">7</button>
+    <button class="btn" onclick="pressKey('8')">8</button>
+    <button class="btn" onclick="pressKey('9')">9</button>
+    <button class="btn btn-op" onclick="pressOp('-')">-</button>
+
+    <button class="btn" onclick="pressKey('4')">4</button>
+    <button class="btn" onclick="pressKey('5')">5</button>
+    <button class="btn" onclick="pressKey('6')">6</button>
+    <button class="btn btn-op" onclick="pressOp('+')">+</button>
+
+    <button class="btn" onclick="pressKey('1')">1</button>
+    <button class="btn" onclick="pressKey('2')">2</button>
+    <button class="btn" onclick="pressKey('3')">3</button>
+    <button class="btn btn-submit" onclick="handleEquals()">=</button>
+
+    <button class="btn" onclick="pressKey('0')" style="grid-column: span 2;">0</button>
+    <button class="btn" onclick="pressKey('.')">.</button>
+
+    <button class="btn btn-share" id="shareBtn" onclick="generateShareLink()">SHARE FLEX LINK 🔗</button>
+  </div>
 </div>
 
 <script>
+  // --- BACKGROUND ANIMATION JAVASCRIPT ---
+  const emojis = ["➕", "➖", "✖️", "➗", "⭐", "✨", "🔥"];
+  const bg = document.getElementById('bgAnimation');
+
+  // Create floating emojis
+  for (let i = 0; i < 20; i++) {
+    let li = document.createElement('li');
+    li.classList.add('bg-emoji');
+    li.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+
+    // Randomize position and animation properties
+    li.style.left = Math.random() * 100 + 'vw';
+    li.style.top = (Math.random() * 100) + 100 + 'vh'; // Start below the screen
+    
+    // Set a random size
+    li.style.fontSize = (Math.random() * 20 + 10) + 'px'; // Size between 10px and 30px
+
+    // Set random animation delay and duration for variation
+    li.style.animationDelay = (Math.random() * 20) + 's';
+    li.style.animationDuration = (Math.random() * 10 + 15) + 's'; // Duration between 15s and 25s
+
+    bg.appendChild(li);
+  }
+
+
+  // --- CALCULATOR & QUIZ JAVASCRIPT (PREVIOUS LOGIC) ---
+  let currentInput = '';
+  let quizExpr = '';
   let currentStreak = 0;
   let highScore = 0;
-  let currentNum1 = 0;
-  let currentNum2 = 0;
-  let isStreakMode = true;
-  
-  // Timer variables
+  let num1 = 0;
+  let num2 = 0;
+  let isQuizMode = true;
+
   let timeLeft = 10;
   let timerInterval = null;
-  const TIME_LIMIT = 10; // Seconds per question
+  const TIME_LIMIT = 10;
 
-  // Check URL parameters for shared streak
+  // Check URL parameters
   const urlParams = new URLSearchParams(window.location.search);
   const sharedStreak = urlParams.get('streak');
   if (sharedStreak) {
-    alert(`Your friend challenged you! Their high score/streak was: ${sharedStreak}`);
+    alert(`Challenge received! Friend's streak: 🔥 ${sharedStreak}`);
   }
 
-  // Allow pressing Enter to submit
-  document.getElementById('answerInput').addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') {
-      checkAnswer();
-    }
+  // Physical Keyboard Handling
+  document.addEventListener('keydown', function(e) {
+    if ((e.key >= '0' && e.key <= '9') || e.key === '.') pressKey(e.key);
+    else if (['+', '-', '*', '/'].includes(e.key)) pressOp(e.key);
+    else if (e.key === 'Backspace') backspace();
+    else if (e.key === 'Escape') clearInput();
+    else if (e.key === 'Enter' || e.key === '=') handleEquals();
   });
 
   function startTimer() {
+    if (!isQuizMode) return;
     clearInterval(timerInterval);
     timeLeft = TIME_LIMIT;
     document.getElementById('timerDisplay').innerText = timeLeft;
@@ -198,96 +340,142 @@
   }
 
   function handleTimeout() {
-    showFeedback('Time out!', false);
-    resetStreakOnFailure();
+    showFeedback('TIME OUT 💀');
+    currentStreak = 0;
+    document.getElementById('streakDisplay').innerText = currentStreak;
     generateQuestion();
   }
 
   function generateQuestion() {
-    currentNum1 = Math.floor(Math.random() * 12) + 1;
-    currentNum2 = Math.floor(Math.random() * 12) + 1;
-    document.getElementById('questionText').innerText = `${currentNum1} × ${currentNum2} = ?`;
-    
-    const input = document.getElementById('answerInput');
-    input.value = '';
-    input.focus();
-    
+    num1 = Math.floor(Math.random() * 12) + 1;
+    num2 = Math.floor(Math.random() * 12) + 1;
+    document.getElementById('questionDisplay').innerText = `${num1} × ${num2} =`;
+    currentInput = '';
+    updateInputDisplay();
     startTimer();
   }
 
-  function checkAnswer() {
-    const inputElement = document.getElementById('answerInput');
-    const inputVal = inputElement.value.trim();
-
-    if (inputVal === '') {
-      return;
+  function pressKey(val) {
+    if (currentInput.length < 10) {
+      currentInput += val;
+      updateInputDisplay();
     }
+  }
+
+  function pressOp(op) {
+    if (!isQuizMode) {
+      if (currentInput === '' && quizExpr === '') return;
+      if (currentInput !== '') {
+        quizExpr += ' ' + currentInput + ' ' + op;
+        currentInput = '';
+      } else {
+        quizExpr = quizExpr.slice(0, -1) + op;
+      }
+      document.getElementById('questionDisplay').innerText = quizExpr;
+      updateInputDisplay();
+    }
+  }
+
+  function backspace() {
+    currentInput = currentInput.slice(0, -1);
+    updateInputDisplay();
+  }
+
+  function clearInput() {
+    currentInput = '';
+    quizExpr = '';
+    if (!isQuizMode) document.getElementById('questionDisplay').innerText = '';
+    updateInputDisplay();
+  }
+
+  function updateInputDisplay() {
+    document.getElementById('inputDisplay').innerText = currentInput || '_';
+  }
+
+  function handleEquals() {
+    if (isQuizMode) {
+      submitQuizAnswer();
+    } else {
+      calculateNormal();
+    }
+  }
+
+  function submitQuizAnswer() {
+    if (currentInput === '' || currentInput === '-') return;
 
     clearInterval(timerInterval);
-
-    const userAnswer = parseInt(inputVal, 10);
-    const correctAnswer = currentNum1 * currentNum2;
+    const userAnswer = parseFloat(currentInput);
+    const correctAnswer = num1 * num2;
 
     if (userAnswer === correctAnswer) {
       currentStreak++;
-      
       if (currentStreak > highScore) {
         highScore = currentStreak;
         document.getElementById('highScoreDisplay').innerText = highScore;
       }
-      
-      showFeedback('Correct!', true);
+      showFeedback('SLAY! CORRECT ✨');
     } else {
-      showFeedback(`Wrong! Answer was ${correctAnswer}.`, false);
-      resetStreakOnFailure();
+      showFeedback(`NOPE! (${correctAnswer}) 😭`);
+      currentStreak = 0;
     }
 
-    document.getElementById('streakDisplay').innerText = isStreakMode ? currentStreak : 'OFF';
+    document.getElementById('streakDisplay').innerText = currentStreak;
     generateQuestion();
   }
 
-  function resetStreakOnFailure() {
-    if (isStreakMode) {
-      currentStreak = 0;
-      document.getElementById('streakDisplay').innerText = currentStreak;
+  function calculateNormal() {
+    if (currentInput === '' && quizExpr === '') return;
+    let fullExpr = quizExpr + ' ' + currentInput;
+    try {
+      let result = Function(`'use strict'; return (${fullExpr})`)();
+      document.getElementById('questionDisplay').innerText = fullExpr + ' =';
+      currentInput = String(Number(result.toFixed(4)));
+      quizExpr = '';
+      updateInputDisplay();
+    } catch (e) {
+      showFeedback('ERROR 😵');
     }
   }
 
-  function toggleStreakMode() {
-    isStreakMode = document.getElementById('streakToggle').checked;
-    const streakDisplay = document.getElementById('streakDisplay');
-    
-    if (!isStreakMode) {
-      currentStreak = 0;
-      streakDisplay.innerText = 'OFF';
+  function toggleMode() {
+    isQuizMode = document.getElementById('streakToggle').checked;
+    const statusBar = document.getElementById('statusBar');
+    const shareBtn = document.getElementById('shareBtn');
+    const modeTag = document.getElementById('modeTag');
+
+    if (isQuizMode) {
+      statusBar.style.visibility = 'visible';
+      shareBtn.style.display = 'block';
+      modeTag.innerText = 'QUIZ MODE';
+      generateQuestion();
     } else {
-      streakDisplay.innerText = currentStreak;
+      clearInterval(timerInterval);
+      statusBar.style.visibility = 'hidden';
+      shareBtn.style.display = 'none';
+      modeTag.innerText = 'CALCULATOR MODE';
+      document.getElementById('questionDisplay').innerText = '';
+      clearInput();
     }
   }
 
-  function showFeedback(message, isSuccess) {
-    const feedback = document.getElementById('feedback');
-    feedback.innerText = message;
-    feedback.className = isSuccess ? 'correct' : 'wrong';
+  function showFeedback(msg) {
+    const feedback = document.getElementById('feedbackDisplay');
+    feedback.innerText = msg;
+    setTimeout(() => {
+      if (feedback.innerText === msg) feedback.innerText = '';
+    }, 2000);
   }
 
   function generateShareLink() {
-    const scoreToShare = isStreakMode ? currentStreak : highScore;
-    const shareUrl = `${window.location.origin}${window.location.pathname}?streak=${scoreToShare}`;
-    
+    const shareUrl = `${window.location.origin}${window.location.pathname}?streak=${currentStreak}`;
     navigator.clipboard.writeText(shareUrl).then(() => {
-      document.getElementById('shareStatus').innerText = 'Link copied to clipboard!';
-      setTimeout(() => {
-        document.getElementById('shareStatus').innerText = '';
-      }, 3000);
+      showFeedback('LINK COPIED! 📋');
     });
   }
 
-  // Start the first question
+  // Initialize
   generateQuestion();
 </script>
 
 </body>
 </html>
-    
-
